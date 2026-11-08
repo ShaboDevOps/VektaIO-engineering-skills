@@ -12,7 +12,7 @@ case "$TYPE" in web|api|mobile|monorepo) ;; *)
   echo "Usage: $0 <web|api|mobile|monorepo>" >&2; exit 1;;
 esac
 
-REPO_RAW="${VEKTA_SKILLS_RAW:-https://raw.githubusercontent.com/VektaIO/engineering-skills/main}"
+REPO_RAW="${VEKTA_SKILLS_RAW:-https://raw.githubusercontent.com/ShaboDevOps/VektaIO-engineering-skills/main}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || true)"
 LOCAL_ROOT=""
 [ -n "$SCRIPT_DIR" ] && [ -d "$SCRIPT_DIR/../templates" ] && LOCAL_ROOT="$SCRIPT_DIR/.."

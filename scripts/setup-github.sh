@@ -100,6 +100,6 @@ cat <<EOF
 
 Also do once:
   • Install the Claude GitHub App on this repo:  run '/install-github-app' in Claude Code, or https://github.com/apps/claude
-  • Make sure the Claude GitHub App can read VektaIO/engineering-skills (or make that repo public — it contains no secrets)
+  • Make sure the Claude GitHub App can read ShaboDevOps/VektaIO-engineering-skills (keep that repo public — it contains no secrets)
   • Replace @VektaIO/engineering in .github/CODEOWNERS with real users/teams
 EOF

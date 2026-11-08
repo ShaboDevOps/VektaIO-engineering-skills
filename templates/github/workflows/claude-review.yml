@@ -33,7 +33,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # or: anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          plugin_marketplaces: https://github.com/VektaIO/engineering-skills.git
+          plugin_marketplaces: https://github.com/ShaboDevOps/VektaIO-engineering-skills.git
           plugins: |
             vekta-core@vektaio-skills
 __STACK_PLUGINS__

@@ -1,7 +1,7 @@
 {
   "extraKnownMarketplaces": {
     "vektaio-skills": {
-      "source": { "source": "github", "repo": "VektaIO/engineering-skills" },
+      "source": { "source": "github", "repo": "ShaboDevOps/VektaIO-engineering-skills" },
       "autoUpdate": true
     }
   },

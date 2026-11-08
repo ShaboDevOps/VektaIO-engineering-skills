@@ -12,7 +12,7 @@ Shared Claude skills that encode VektaIO's production standards. One repo, used 
 
 ## 1. Publish this repo (once)
 
-1. Create a GitHub repo `VektaIO/engineering-skills` (private is fine) and push this folder.
+1. This repo lives at `ShaboDevOps/VektaIO-engineering-skills` (public, so projects and the Claude GitHub App can read it).
    If you use a different org/repo name, update `templates/*/.claude/settings.json`.
 2. Teammates need read access to the repo and working git credentials (`gh auth login`).
 
@@ -22,7 +22,7 @@ From the project root:
 
 ```bash
 # pick one: web | api | mobile | monorepo
-curl -fsSL https://raw.githubusercontent.com/VektaIO/engineering-skills/main/scripts/add-to-project.sh | bash -s -- api
+curl -fsSL https://raw.githubusercontent.com/ShaboDevOps/VektaIO-engineering-skills/main/scripts/add-to-project.sh | bash -s -- api
 # or, with this repo cloned locally:
 ~/code/engineering-skills/scripts/add-to-project.sh api
 ```
@@ -126,7 +126,7 @@ Claude picks the right skill automatically from the task. To force one:
 Install manually (without project settings):
 
 ```
-/plugin marketplace add VektaIO/engineering-skills
+/plugin marketplace add ShaboDevOps/VektaIO-engineering-skills
 /plugin install vekta-api@vektaio-skills
 ```
 

@@ -3,7 +3,7 @@
     "vektaio-skills": {
       "source": {
         "source": "github",
-        "repo": "VektaIO/engineering-skills"
+        "repo": "ShaboDevOps/VektaIO-engineering-skills"
       },
       "autoUpdate": true
     }
