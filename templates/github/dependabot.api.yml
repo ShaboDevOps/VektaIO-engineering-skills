@@ -1,0 +1,9 @@
+  - package-ecosystem: uv
+    directory: __DIR__
+    target-branch: develop
+    schedule: { interval: weekly }
+    cooldown: { default-days: 7 }
+    commit-message: { prefix: "deps" }
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch: { update-types: ["minor", "patch"] }

@@ -1,0 +1,10 @@
+{
+  "tokens": "tokens.json",
+  "outputs": {
+    "css": "../src/styles/tokens.css",
+    "js": "../src/shared/theme/theme.js",
+    "react": "../src/shared/theme/useTheme.ts",
+    "themeInit": "../public/theme-init.js",
+    "preview": "preview.html"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "vekta-core",
+  "version": "1.3.0",
+  "description": "Engineering workflow + Claude dev pipeline: /start, /ship, /promote, /review-pr, code-reviewer and qa-tester agents, git guard hook, CI/CD conventions.",
+  "author": {
+    "name": "VektaIO Innovation Limited"
+  },
+  "keywords": [
+    "workflow",
+    "ci",
+    "devops"
+  ]
+}

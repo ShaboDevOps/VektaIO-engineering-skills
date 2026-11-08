@@ -1,0 +1,28 @@
+name: Validate skills
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions: {}
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5 # pin to a full commit SHA in production
+        with:
+          persist-credentials: false
+      - name: JSON is valid
+        run: |
+          for f in .claude-plugin/marketplace.json plugins/*/.claude-plugin/plugin.json templates/*/.claude/settings.json; do
+            python3 -m json.tool "$f" > /dev/null || { echo "Invalid JSON: $f"; exit 1; }
+          done
+      - name: Every skill has name + description frontmatter
+        run: |
+          for f in plugins/*/skills/*/SKILL.md; do
+            head -5 "$f" | grep -q '^name: ' || { echo "Missing name: $f"; exit 1; }
+            head -5 "$f" | grep -q '^description: ' || { echo "Missing description: $f"; exit 1; }
+          done
+      - name: Claude plugin validate
+        run: npx -y @anthropic-ai/claude-code plugin validate .

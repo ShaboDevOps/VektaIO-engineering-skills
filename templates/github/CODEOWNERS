@@ -1,0 +1,6 @@
+# Every path needs an owner. Replace with your GitHub usernames or teams.
+*                       @VektaIO/engineering
+# High-risk areas need a second, specific reviewer:
+# /app/modules/payments/  @VektaIO/payments
+# /migrations/            @VektaIO/backend-leads
+# /.github/               @VektaIO/engineering-leads

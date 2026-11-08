@@ -1,0 +1,65 @@
+name: CI (web)
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+permissions: {}
+concurrency:
+  group: ci-web-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  ci-web:
+    name: ci-web
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: __WORKDIR_WEB__
+    steps:
+      # Pin actions to full commit SHAs in production (Dependabot keeps them updated).
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: __WORKDIR_WEB__/package.json
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: __WORKDIR_WEB__/pnpm-lock.yaml
+      - uses: extractions/setup-just@v3
+      - run: pnpm install --frozen-lockfile
+      - run: just ci
+
+  e2e-web:
+    name: e2e-web
+    # Full end-to-end regression before anything reaches production.
+    if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
+    needs: ci-web
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: __WORKDIR_WEB__
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: __WORKDIR_WEB__/package.json
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: __WORKDIR_WEB__/pnpm-lock.yaml
+      - uses: extractions/setup-just@v3
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps
+      - run: just e2e

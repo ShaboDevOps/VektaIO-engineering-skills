@@ -1,0 +1,25 @@
+name: Deploy staging
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+jobs:
+  deploy-staging:
+    name: deploy-staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: staging
+    permissions:
+      contents: read
+      id-token: write   # OIDC to your cloud provider; remove if unused
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: extractions/setup-just@v3
+      # TODO: add your cloud login step (OIDC preferred, no long-lived keys).
+      - run: just deploy staging

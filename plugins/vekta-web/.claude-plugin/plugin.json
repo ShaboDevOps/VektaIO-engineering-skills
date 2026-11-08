@@ -1,0 +1,13 @@
+{
+  "name": "vekta-web",
+  "version": "1.2.0",
+  "description": "Production React + TypeScript frontend skill.",
+  "author": {
+    "name": "VektaIO Innovation Limited"
+  },
+  "keywords": [
+    "react",
+    "typescript",
+    "frontend"
+  ]
+}

@@ -1,0 +1,207 @@
+name: CI
+# One workflow for the monorepo. Only apps touched by a PR are checked on PRs into develop;
+# PRs into main (release candidates and patches) check everything. The final `ci` job is the
+# single required status check.
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+permissions: {}
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  changes:
+    name: changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      api: ${{ steps.filter.outputs.api == 'true' || github.base_ref == 'main' || github.ref == 'refs/heads/main' }}
+      web: ${{ steps.filter.outputs.web == 'true' || github.base_ref == 'main' || github.ref == 'refs/heads/main' }}
+      mobile: ${{ steps.filter.outputs.mobile == 'true' || github.base_ref == 'main' || github.ref == 'refs/heads/main' }}
+      contract: ${{ steps.filter.outputs.contract == 'true' || github.base_ref == 'main' }}
+      release_gate: ${{ github.base_ref == 'main' || github.ref == 'refs/heads/main' }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            api:
+              - 'apps/api/**'
+              - 'packages/contract/**'
+            web:
+              - 'apps/web/**'
+              - 'packages/contract/**'
+              - 'packages/design/**'
+            mobile:
+              - 'apps/mobile/**'
+              - 'packages/contract/**'
+              - 'packages/design/**'
+            contract:
+              - 'apps/api/**'
+              - 'packages/contract/**'
+              - 'apps/web/src/shared/api/**'
+              - 'apps/mobile/packages/api_client/**'
+
+  api:
+    name: api
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: apps/api
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: app_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U app" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+    env:
+      ENVIRONMENT: local
+      DATABASE_URL: postgresql+psycopg://app:app@localhost:5432/app_test
+      REDIS_URL: redis://localhost:6379/0
+      SECRET_KEY: ci-only-not-a-secret
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - uses: extractions/setup-just@v3
+      - run: uv sync --locked
+      - run: just ci
+      - name: Release gate — migrations up/down on a fresh DB
+        if: needs.changes.outputs.release_gate == 'true'
+        run: just release-check
+
+  web:
+    name: web
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: apps/web/package.json
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+      - uses: extractions/setup-just@v3
+      - run: pnpm install --frozen-lockfile
+      - run: just ci
+      - name: Release gate — end-to-end tests
+        if: needs.changes.outputs.release_gate == 'true'
+        run: |
+          pnpm exec playwright install --with-deps
+          just e2e
+
+  mobile:
+    name: mobile
+    needs: changes
+    if: needs.changes.outputs.mobile == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - uses: extractions/setup-just@v3
+      - run: flutter pub get --enforce-lockfile
+      - run: just ci
+      - name: Release gate — production build
+        if: needs.changes.outputs.release_gate == 'true'
+        run: just build-check
+
+  contract:
+    name: contract
+    # Generated contract/clients are up to date and there is no breaking API change vs the base branch.
+    needs: changes
+    if: needs.changes.outputs.contract == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: apps/web/package.json
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: (cd apps/api && uv sync --locked) && (cd apps/web && pnpm install --frozen-lockfile)
+      - run: ./scripts/check-contract.sh
+        env:
+          BASE: ${{ github.base_ref || 'develop' }}
+
+  ci:
+    name: ci
+    # Single required check: passes when every job that needed to run succeeded (skipped = not affected).
+    if: always()
+    needs: [changes, api, web, mobile, contract]
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: All affected apps passed
+        env:
+          RESULTS: ${{ toJSON(needs.*.result) }}
+        run: |
+          echo "Job results: $RESULTS"
+          if echo "$RESULTS" | grep -Eq '"(failure|cancelled)"'; then
+            echo "::error::One or more app checks failed"; exit 1
+          fi

@@ -1,0 +1,50 @@
+# Root justfile — orchestrates all apps. Per-app recipes: just api::test, just web::dev, just mobile::ci
+set dotenv-load := true
+
+mod api 'apps/api'
+mod web 'apps/web'
+mod mobile 'apps/mobile'
+
+default:
+    @just --list --list-submodules
+
+setup:
+    just api::setup
+    just web::setup
+    just mobile::setup
+
+# Local services (Postgres, Redis, MinIO, Mailpit)
+up:
+    docker compose up -d
+
+down:
+    docker compose down
+
+dev-api: up
+    just api::dev
+
+dev-web:
+    just web::dev
+
+dev-mobile:
+    just mobile::dev
+
+# Export the API contract and regenerate the web + mobile clients
+gen:
+    ./scripts/gen-clients.sh
+
+# Design tokens (packages/design) → web tokens.css + mobile app_tokens.dart (add --check to verify only)
+tokens *args:
+    ./scripts/tokens.sh {{args}}
+
+# Which apps does this branch change compared with develop (or $BASE)?
+changed:
+    @git diff --name-only "origin/${BASE:-develop}...HEAD" | awk -F/ '$1=="apps"{print $2} $1=="packages"{print "contract"}' | sort -u
+
+# CI for every app
+ci:
+    ./scripts/tokens.sh --check
+    just api::ci
+    just web::ci
+    just mobile::ci
+    ./scripts/check-contract.sh

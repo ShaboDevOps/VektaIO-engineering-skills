@@ -1,0 +1,13 @@
+{
+  "name": "vekta-api",
+  "version": "1.1.0",
+  "description": "Production Python FastAPI backend skill.",
+  "author": {
+    "name": "VektaIO Innovation Limited"
+  },
+  "keywords": [
+    "python",
+    "fastapi",
+    "backend"
+  ]
+}

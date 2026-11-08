@@ -1,0 +1,16 @@
+{
+  "extraKnownMarketplaces": {
+    "vektaio-skills": {
+      "source": {
+        "source": "github",
+        "repo": "VektaIO/engineering-skills"
+      },
+      "autoUpdate": true
+    }
+  },
+  "enabledPlugins": {
+    "vekta-core@vektaio-skills": true,
+    "vekta-web@vektaio-skills": true,
+    "vekta-design@vektaio-skills": true
+  }
+}

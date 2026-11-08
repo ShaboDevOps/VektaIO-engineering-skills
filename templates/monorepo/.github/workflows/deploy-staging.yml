@@ -1,0 +1,90 @@
+name: Deploy staging
+# Every merge into develop deploys the apps it changed to staging.
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+    inputs:
+      apps:
+        description: "Apps to deploy (comma separated: api,web,mobile)"
+        default: "api,web"
+permissions: {}
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      api: ${{ steps.filter.outputs.api == 'true' || contains(inputs.apps, 'api') }}
+      web: ${{ steps.filter.outputs.web == 'true' || contains(inputs.apps, 'web') }}
+      mobile: ${{ steps.filter.outputs.mobile == 'true' || contains(inputs.apps, 'mobile') }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            api: ['apps/api/**']
+            web: ['apps/web/**', 'packages/contract/**', 'packages/design/**']
+            mobile: ['apps/mobile/**', 'packages/contract/**', 'packages/design/**']
+
+  deploy-api:
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    environment: staging
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: extractions/setup-just@v3
+      # TODO: cloud login (OIDC preferred)
+      - run: just deploy staging
+
+  deploy-web:
+    # Web deploys after the API so new endpoints exist first.
+    needs: [changes, deploy-api]
+    if: always() && needs.changes.outputs.web == 'true' && needs.deploy-api.result != 'failure'
+    runs-on: ubuntu-latest
+    environment: staging
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: extractions/setup-just@v3
+      - run: just deploy staging
+
+  deploy-mobile:
+    # Staging build to Play internal testing / TestFlight internal.
+    needs: [changes, deploy-api]
+    if: always() && needs.changes.outputs.mobile == 'true' && needs.deploy-api.result != 'failure'
+    runs-on: ubuntu-latest
+    environment: staging
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: extractions/setup-just@v3
+      - run: just deploy staging

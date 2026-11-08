@@ -1,0 +1,59 @@
+name: CI (mobile)
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+permissions: {}
+concurrency:
+  group: ci-mobile-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  ci-mobile:
+    name: ci-mobile
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: __WORKDIR_MOBILE__
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - uses: extractions/setup-just@v3
+      - run: flutter pub get --enforce-lockfile
+      - run: just ci
+
+  build-mobile:
+    name: build-mobile
+    # Release gate: the production flavor must build before it can reach main.
+    if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
+    needs: ci-mobile
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: __WORKDIR_MOBILE__
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - uses: extractions/setup-just@v3
+      - run: flutter pub get --enforce-lockfile
+      - run: just build-check

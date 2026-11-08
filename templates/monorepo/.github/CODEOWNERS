@@ -1,0 +1,8 @@
+# Every path needs an owner. Replace with real GitHub users/teams.
+*                         @VektaIO/engineering
+/apps/api/                @VektaIO/backend
+/apps/web/                @VektaIO/frontend
+/apps/mobile/             @VektaIO/mobile
+# Contract changes affect every app — backend and a client owner review them.
+/packages/contract/       @VektaIO/backend @VektaIO/mobile
+/.github/                 @VektaIO/engineering-leads

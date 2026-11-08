@@ -1,0 +1,41 @@
+name: Branch policy
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches: [develop, main]
+permissions: {}
+jobs:
+  branch-policy:
+    name: branch-policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions: {}
+    steps:
+      - name: Check source branch, branch name and PR title
+        env:
+          BASE: ${{ github.base_ref }}
+          HEAD: ${{ github.head_ref }}
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          fail() { echo "::error::$1"; exit 1; }
+
+          case "$BASE" in
+            develop)
+              [[ "$HEAD" =~ ^(feat|fix|chore|docs|refactor|test|perf|deps)/ || "$HEAD" == "main" || "$HEAD" =~ ^(dependabot|renovate)/ ]] \
+                || fail "develop only accepts feat/*, fix/*, chore/*, docs/*, refactor/*, test/*, perf/*, deps/* or back-merges from main (got '$HEAD'). Urgent production fixes use patch/* into main."
+              ;;
+            main)
+              [[ "$HEAD" == "develop" || "$HEAD" =~ ^patch/ || "$HEAD" =~ ^release-please-- ]] \
+                || fail "main only accepts develop, patch/* or release-please PRs (got '$HEAD')."
+              ;;
+          esac
+
+          if [[ "$HEAD" =~ ^(feat|fix|patch)/ ]]; then
+            [[ "$HEAD" =~ ^(feat|fix|patch)/[a-z0-9][a-z0-9-]*$ ]] \
+              || fail "Branch name must look like feat/123-short-name (lowercase, hyphens)."
+          fi
+
+          [[ "$TITLE" =~ ^(feat|fix|perf|refactor|docs|test|chore|build|ci|revert|release|deps)(\([a-z0-9._/-]+\))?!?:\ .+ ]] \
+            || fail "PR title must be a Conventional Commit, e.g. 'feat(orders): add cancel button' (got '$TITLE')."
+
+          echo "Branch policy OK: $HEAD -> $BASE"

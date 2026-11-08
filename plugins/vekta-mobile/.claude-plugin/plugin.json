@@ -1,0 +1,13 @@
+{
+  "name": "vekta-mobile",
+  "version": "1.2.0",
+  "description": "Production Flutter mobile skill.",
+  "author": {
+    "name": "VektaIO Innovation Limited"
+  },
+  "keywords": [
+    "flutter",
+    "dart",
+    "mobile"
+  ]
+}

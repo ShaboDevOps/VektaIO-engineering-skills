@@ -1,0 +1,74 @@
+name: Release
+on:
+  push:
+    branches: [main]
+permissions: {}
+concurrency:
+  group: release
+  cancel-in-progress: false
+jobs:
+  release-please:
+    name: release-please
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          # A PAT or GitHub App token lets CI run on the Release PR; GITHUB_TOKEN-created PRs don't trigger workflows.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  deploy-production:
+    name: deploy-production
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production   # requires a human approval (set up by setup-github.sh)
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+          persist-credentials: false
+      - uses: extractions/setup-just@v3
+      # TODO: add your cloud login step (OIDC preferred).
+      - run: just deploy production
+        env:
+          APP_VERSION: ${{ needs.release-please.outputs.tag_name }}
+
+  back-merge:
+    name: back-merge
+    # Keeps develop up to date with main after patches and releases.
+    needs: release-please
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Open main -> develop PR if develop is behind
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+        run: |
+          git fetch origin develop main
+          if [ "$(git rev-list --count origin/develop..origin/main)" = "0" ]; then
+            echo "develop already contains main"; exit 0
+          fi
+          existing="$(gh pr list --base develop --head main --state open --json number --jq '.[0].number')"
+          if [ -n "$existing" ]; then echo "Back-merge PR #$existing already open"; exit 0; fi
+          gh pr create --base develop --head main \
+            --title "chore: back-merge main into develop" \
+            --body "Automatic back-merge after a release or patch on \`main\`. Merge with a **merge commit**. Resolve conflicts in favour of \`main\` for hotfixed code."

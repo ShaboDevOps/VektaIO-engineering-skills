@@ -1,0 +1,12 @@
+{
+  "tokens": "tokens.json",
+  "outputs": {
+    "css": "../../apps/web/src/styles/tokens.css",
+    "js": "../../apps/web/src/shared/theme/theme.js",
+    "react": "../../apps/web/src/shared/theme/useTheme.ts",
+    "themeInit": "../../apps/web/public/theme-init.js",
+    "dart": "../../apps/mobile/lib/app/theme/app_tokens.dart",
+    "preview": "preview.html"
+  },
+  "dartMaterialImport": "package:flutter/material.dart"
+}

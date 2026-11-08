@@ -1,0 +1,8 @@
+.env
+.contract-base/
+node_modules/
+.venv/
+build/
+dist/
+.dart_tool/
+coverage/

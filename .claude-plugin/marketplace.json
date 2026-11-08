@@ -1,0 +1,34 @@
+{
+  "name": "vektaio-skills",
+  "owner": {
+    "name": "VektaIO Innovation Limited"
+  },
+  "description": "VektaIO shared engineering skills: production standards for React, Python (FastAPI), Flutter, CI/CD, testing and code review.",
+  "plugins": [
+    {
+      "name": "vekta-core",
+      "source": "./plugins/vekta-core",
+      "description": "Engineering workflow (repo, CI/CD, PRs, releases, flags, ops). Enable in EVERY project."
+    },
+    {
+      "name": "vekta-web",
+      "source": "./plugins/vekta-web",
+      "description": "React + TypeScript frontend standards (Vite / Next.js)."
+    },
+    {
+      "name": "vekta-api",
+      "source": "./plugins/vekta-api",
+      "description": "Python FastAPI backend standards."
+    },
+    {
+      "name": "vekta-mobile",
+      "source": "./plugins/vekta-mobile",
+      "description": "Flutter mobile app standards."
+    },
+    {
+      "name": "vekta-design",
+      "source": "./plugins/vekta-design",
+      "description": "Per-project design identity: direction, design tokens for web + Flutter, UX and motion craft. Enable in every project with a UI."
+    }
+  ]
+}

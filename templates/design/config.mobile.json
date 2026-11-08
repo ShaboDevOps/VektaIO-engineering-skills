@@ -1,0 +1,8 @@
+{
+  "tokens": "tokens.json",
+  "outputs": {
+    "dart": "../lib/app/theme/app_tokens.dart",
+    "preview": "preview.html"
+  },
+  "dartMaterialImport": "package:flutter/material.dart"
+}
