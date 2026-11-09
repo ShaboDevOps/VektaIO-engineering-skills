@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-09 — vekta-design 1.2.0: design-extract
+- New skill **design-extract**: extract a full design system from images, PDFs, Figma exports, websites or existing code; exact tokens; component/layout/asset specs; fidelity log; generates the project skill `.claude/skills/design-system/SKILL.md`
+- Scripts: `extract_url_styles.py` (rendered styles from a live page + component crops), `extract_image_palette.py` (exact pixel colours, contrast, region sampling), `compare_screens.py` (pixel comparison of implementation vs source)
+- vendor-skills.sh: skill folders (incl. scripts/references) copied into projects
+
 ## 2026-11-08 — runtime theming (vekta-design 1.1.0, vekta-web 1.2.0, vekta-mobile 1.2.0, vekta-api 1.1.0)
 - tokens.json: `color.themes` presets (seed or explicit overrides), `color.defaultTheme.label`, `color.customColor`, `color.brandGroup`
 - OKLCH colour engine: any colour → accessible primary for light + dark (Python reference; generated JS + Dart; JS verified identical on 314 colours)

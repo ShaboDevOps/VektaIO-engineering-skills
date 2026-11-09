@@ -56,7 +56,7 @@ Copied from ShaboDevOps/VektaIO-engineering-skills @ $REV by \`scripts/vendor-sk
 Don't edit here — change the skills repo, then re-run:
 \`~/vektaio-engineering-skills/scripts/vendor-skills.sh .\`
 
-Commands: /start · /ship · /promote · /review-pr · /design-direction
+Commands: /start · /ship · /promote · /review-pr · /design-direction · /design-extract
 Agents: code-reviewer · qa-tester
 MD
 echo "Done — open a NEW Claude Code session in $DEST."

@@ -8,7 +8,7 @@ Shared Claude skills that encode VektaIO's production standards. One repo, used 
 | `vekta-web` | `react-frontend-expert` | React / Next.js web apps |
 | `vekta-api` | `python-backend-expert` | FastAPI backends |
 | `vekta-mobile` | `flutter-mobile-expert` | Flutter apps |
-| `vekta-design` | `design-direction`, `ui-craft` | Every project with a UI (web, mobile, monorepo) |
+| `vekta-design` | `design-direction`, `design-extract`, `ui-craft` | Every project with a UI (web, mobile, monorepo) |
 
 ## 1. Publish this repo (once)
 
@@ -61,6 +61,13 @@ Every web/mobile/monorepo project gets a `design/` folder (`packages/design/` in
 3. The React and Flutter skills only use these tokens (no hard-coded colours, sizes or durations), restyle the component library to the direction, and follow `vekta-design:ui-craft` for UX and motion. CI runs `just tokens --check`; Claude's PR review checks design fidelity.
 
 Change the look later by editing the tokens (or re-running the skill) and `just tokens` — web and mobile update together.
+
+### Replicate a design you were given — `design-extract`
+
+Give Claude screenshots, mockups, a PDF brand guide, a Figma export or a link to a site/app you own or may replicate:
+> /design-extract design-source/screens/*.png and https://example.com — replicate this design exactly
+
+Claude measures it (exact colours from pixels or rendered CSS, fonts, type scale, spacing, radii, shadows, motion, every component and state) using the scripts in `skills/design-extract/scripts/`, writes `tokens.json`, `components.md`, `layout.md`, `assets.md`, `fidelity.md`, generates a project skill `.claude/skills/design-system/SKILL.md` that all future UI work follows, then rebuilds key screens and compares them pixel by pixel with the source (`compare_screens.py`).
 
 ### Theme switching for users — one place
 

@@ -1,7 +1,7 @@
 {
   "name": "vekta-design",
-  "version": "1.1.0",
-  "description": "Per-project design identity: design direction, design tokens (web + Flutter), UX and motion craft \u2014 so every product has its own look.",
+  "version": "1.2.0",
+  "description": "Per-project design identity: create a direction (design-direction), or extract and replicate a provided design exactly (design-extract); design tokens for web + Flutter; UX and motion craft (ui-craft).",
   "author": {
     "name": "VektaIO Innovation Limited"
   },

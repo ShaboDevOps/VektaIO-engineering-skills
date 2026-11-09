@@ -17,6 +17,8 @@ design/                (single-app repo)      packages/design/   (monorepo)
 ```
 `just tokens` (→ `scripts/tokens.sh` → `scripts/build_tokens.py`) generates the Tailwind CSS theme for web and the Flutter theme for mobile, and fails if any text/background pair is below WCAG contrast. CI runs `just tokens --check`.
 
+> **Replicating an existing design exactly** (screens, Figma, a website, a PDF brand guide)? Use the **design-extract** skill instead — it measures the source and builds tokens, component specs and a project design-system skill from it. Use this skill to *create* a new direction.
+
 ## 1. Gather inputs (use whatever the user provides — all optional)
 
 | Input | How to use it |
